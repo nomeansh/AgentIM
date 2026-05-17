@@ -41,6 +41,12 @@ nbdist/
 *.xml.versionsBackup
 *.swp
 
+# Local agent/runtime files
+.omx/
+.run/
+.claude/
+.java-version
+
 !*/build/*.java
 !*/build/*.html
 !*/build/*.xml

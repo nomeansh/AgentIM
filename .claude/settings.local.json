@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(mkdir -p AgentIM-Business/src/main/java/com/AgentIM/business)",
-      "Bash(mkdir -p AgentIM-Business/src/main/resources)"
-    ]
-  }
-}
