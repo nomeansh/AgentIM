@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.AgentIM</groupId>
+        <artifactId>AgentIM</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <modules>
+        <module>AgentIM-api-bom</module>
+        <module>AgentIM-api-auth</module>
+        <module>AgentIM-api-resource</module>
+    </modules>
+
+    <artifactId>AgentIM-api</artifactId>
+    <packaging>pom</packaging>
+
+    <description>
+        AgentIM-api 跨服务接口
+    </description>
+
+</project>

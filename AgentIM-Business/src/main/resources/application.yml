@@ -1,0 +1,56 @@
+# Tomcat
+server:
+  port: 9211
+
+# Spring
+spring:
+  application:
+    name: agentim-business
+  profiles:
+    active: @profiles.active@
+
+--- # nacos 配置
+spring:
+  config:
+    activate:
+      on-profile: dev,prod
+    import:
+      - optional:nacos:application-common.yml
+      - optional:nacos:datasource.yml
+      - optional:nacos:${spring.application.name}.yml
+  cloud:
+    nacos:
+      server-addr: @nacos.server@
+      username: @nacos.username@
+      password: @nacos.password@
+      discovery:
+        group: @nacos.discovery.group@
+        namespace: ${spring.profiles.active}
+      config:
+        group: @nacos.config.group@
+        namespace: ${spring.profiles.active}
+
+agentim:
+  im:
+    message-edit-window-hours: 48
+    message-delete-window-hours: 48
+    text-max-length: 4096
+    event:
+      websocket-fallback: true
+      rocketmq:
+        enabled: false
+        topic: agentim-im-event
+        tag: im
+
+# RocketMQ 标准配置在启用 agentim.im.event.rocketmq.enabled 后必须通过本地配置或 Nacos 提供：
+# rocketmq:
+#   name-server: 127.0.0.1:9876
+#   producer:
+#     group: agentim-business-im-event-producer
+
+# common-encrypt 字段加解密使用框架公共模块，启用前必须提供稳定秘钥：
+# mybatis-encryptor:
+#   enable: true
+#   algorithm: AES
+#   password: 1234567890123456
+#   encode: BASE64

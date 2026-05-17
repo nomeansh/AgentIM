@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.AgentIM</groupId>
+        <artifactId>AgentIM-common</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>AgentIM-common-service-impl</artifactId>
+
+    <description>
+        AgentIM-common-service-impl 通用service实现模块(用于处理core模块中的通用业务service类)
+    </description>
+
+    <dependencies>
+
+        <!-- RuoYi Common Security -->
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-common-redis</artifactId>
+        </dependency>
+
+    </dependencies>
+</project>

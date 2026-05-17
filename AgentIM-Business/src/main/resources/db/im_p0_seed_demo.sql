@@ -1,0 +1,368 @@
+-- AgentIM P0 核心 IM PostgreSQL 16 演示数据脚本
+-- 前置条件：先执行 im_p0_postgres.sql。
+--
+-- 说明：
+-- 1. 本脚本只用于本地开发、联调和演示，不用于生产环境。
+-- 2. 所有 ID 使用固定 BIGINT，便于前后端联调时复现聊天、消息、资源、投票和审计数据。
+-- 3. demo 用户密码均为 123456。ImPasswordCodec 兼容开发期明文种子数据，新注册用户仍写入 bcrypt$ 摘要。
+-- 4. 本脚本会填充 im_user 的用户级数据策略预留字段；P0 聊天数据权限仍由 im_chat_member 的成员关系和角色承担。
+
+BEGIN;
+
+SET search_path TO public;
+
+INSERT INTO im_user (
+    id, username, password, nickname, avatar, bio, phone, email, status,
+    data_scope, permission_tags, access_policy,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000000001, 'demo_alice', '123456', 'Alice Chen', 'https://cdn.agentim.local/avatar/demo_alice.png', 'P0 群组与频道管理员，负责产品讨论。', '13800000001', 'alice.demo@agentim.local', '0', 'trusted', '["p0-demo","product","admin-preview"]'::jsonb, '{"allowTags":["p0-demo","public","internal-doc"],"denyTags":[],"resourceScopes":["chat","resource","poll"]}'::jsonb, -1, -1, TIMESTAMP '2026-05-01 09:00:00', -1, TIMESTAMP '2026-05-01 09:00:00', '0'),
+    (910000000000000002, 'demo_bob', '123456', 'Bob Li', 'https://cdn.agentim.local/avatar/demo_bob.png', '后端开发，关注消息流、幂等和权限边界。', '13800000002', 'bob.demo@agentim.local', '0', 'standard', '["p0-demo","backend"]'::jsonb, '{"allowTags":["p0-demo","technical"],"denyTags":["ops-finance"],"resourceScopes":["chat","resource"]}'::jsonb, -1, -1, TIMESTAMP '2026-05-01 09:05:00', -1, TIMESTAMP '2026-05-01 09:05:00', '0'),
+    (910000000000000003, 'demo_clara', '123456', 'Clara Wang', 'https://cdn.agentim.local/avatar/demo_clara.png', '设计与前端联调，负责富媒体体验。', '13800000003', 'clara.demo@agentim.local', '0', 'standard', '["p0-demo","design","frontend"]'::jsonb, '{"allowTags":["p0-demo","design-review"],"denyTags":["backend-secret"],"resourceScopes":["chat","resource"]}'::jsonb, -1, -1, TIMESTAMP '2026-05-01 09:10:00', -1, TIMESTAMP '2026-05-01 09:10:00', '0'),
+    (910000000000000004, 'demo_dylan', '123456', 'Dylan Zhao', 'https://cdn.agentim.local/avatar/demo_dylan.png', '移动端测试账号，主要验证多设备同步。', '13800000004', 'dylan.demo@agentim.local', '0', 'restricted', '["p0-demo","mobile-test"]'::jsonb, '{"allowTags":["p0-demo"],"denyTags":["admin-preview","ops-finance","internal-doc"],"resourceScopes":["chat"],"denyReason":"演示受限账号，只开放基础聊天数据"}'::jsonb, -1, -1, TIMESTAMP '2026-05-01 09:15:00', -1, TIMESTAMP '2026-05-01 09:15:00', '0'),
+    (910000000000000005, 'demo_eva', '123456', 'Eva Xu', 'https://cdn.agentim.local/avatar/demo_eva.png', '运营账号，关注频道公告和投票反馈。', '13800000005', 'eva.demo@agentim.local', '0', 'standard', '["p0-demo","ops","channel"]'::jsonb, '{"allowTags":["p0-demo","channel-ops"],"denyTags":["backend-secret"],"resourceScopes":["chat","poll"]}'::jsonb, -1, -1, TIMESTAMP '2026-05-01 09:20:00', -1, TIMESTAMP '2026-05-01 09:20:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    username = EXCLUDED.username,
+    password = EXCLUDED.password,
+    nickname = EXCLUDED.nickname,
+    avatar = EXCLUDED.avatar,
+    bio = EXCLUDED.bio,
+    phone = EXCLUDED.phone,
+    email = EXCLUDED.email,
+    status = EXCLUDED.status,
+    data_scope = EXCLUDED.data_scope,
+    permission_tags = EXCLUDED.permission_tags,
+    access_policy = EXCLUDED.access_policy,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_chat (
+    id, type, title, avatar, description, owner_id, seq, last_msg_id, last_msg_content, last_msg_time, status,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000100001, 'saved', 'Alice 的保存消息', NULL, 'Alice 私人收藏与草稿。', 910000000000000001, 2, 910000000000300002, 'P0 接口联调清单.pdf', TIMESTAMP '2026-05-02 10:05:00', 'active', -1, 910000000000000001, TIMESTAMP '2026-05-01 09:00:00', 910000000000000001, TIMESTAMP '2026-05-02 10:05:00', '0'),
+    (910000000000100002, 'saved', 'Bob 的保存消息', NULL, 'Bob 私人收藏与草稿。', 910000000000000002, 1, 910000000000300003, 'RocketMQ 消息补偿方案草稿', TIMESTAMP '2026-05-02 10:10:00', 'active', -1, 910000000000000002, TIMESTAMP '2026-05-01 09:05:00', 910000000000000002, TIMESTAMP '2026-05-02 10:10:00', '0'),
+    (910000000000100003, 'saved', 'Clara 的保存消息', NULL, 'Clara 私人收藏与草稿。', 910000000000000003, 1, 910000000000300004, '收藏：新版聊天气泡截图', TIMESTAMP '2026-05-02 10:15:00', 'active', -1, 910000000000000003, TIMESTAMP '2026-05-01 09:10:00', 910000000000000003, TIMESTAMP '2026-05-02 10:15:00', '0'),
+    (910000000000100004, 'saved', 'Dylan 的保存消息', NULL, 'Dylan 私人收藏与草稿。', 910000000000000004, 1, 910000000000300005, '移动端回归用例：离线后重连。', TIMESTAMP '2026-05-02 10:20:00', 'active', -1, 910000000000000004, TIMESTAMP '2026-05-01 09:15:00', 910000000000000004, TIMESTAMP '2026-05-02 10:20:00', '0'),
+    (910000000000100005, 'saved', 'Eva 的保存消息', NULL, 'Eva 私人收藏与草稿。', 910000000000000005, 1, 910000000000300006, '频道运营话术草稿', TIMESTAMP '2026-05-02 10:25:00', 'active', -1, 910000000000000005, TIMESTAMP '2026-05-01 09:20:00', 910000000000000005, TIMESTAMP '2026-05-02 10:25:00', '0'),
+    (910000000000100006, 'private', 'Alice 与 Bob', NULL, '双人私聊，用于验证私聊数据权限。', NULL, 5, 910000000000300011, 'Bob 设置了聊天背景', TIMESTAMP '2026-05-02 11:20:00', 'active', -1, 910000000000000001, TIMESTAMP '2026-05-02 11:00:00', 910000000000000002, TIMESTAMP '2026-05-02 11:20:00', '0'),
+    (910000000000100007, 'group', 'AgentIM P0 研发群', 'https://cdn.agentim.local/chat/p0-group.png', '核心 IM P0 研发、测试和联调讨论。', 910000000000000001, 4, 910000000000300015, '我按这个清单补充移动端场景。', TIMESTAMP '2026-05-02 12:30:00', 'active', -1, 910000000000000001, TIMESTAMP '2026-05-02 12:00:00', 910000000000000002, TIMESTAMP '2026-05-02 12:30:00', '0'),
+    (910000000000100008, 'channel', 'AgentIM 发布频道', 'https://cdn.agentim.local/chat/release-channel.png', '只读公告频道，订阅者不可发言。', 910000000000000001, 3, 910000000000300018, '你希望下一个演示优先展示什么？', TIMESTAMP '2026-05-02 13:20:00', 'active', -1, 910000000000000001, TIMESTAMP '2026-05-02 13:00:00', 910000000000000003, TIMESTAMP '2026-05-02 13:20:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    type = EXCLUDED.type,
+    title = EXCLUDED.title,
+    avatar = EXCLUDED.avatar,
+    description = EXCLUDED.description,
+    owner_id = EXCLUDED.owner_id,
+    seq = EXCLUDED.seq,
+    last_msg_id = EXCLUDED.last_msg_id,
+    last_msg_content = EXCLUDED.last_msg_content,
+    last_msg_time = EXCLUDED.last_msg_time,
+    status = EXCLUDED.status,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_chat_member (
+    id, chat_id, user_id, role, joined_time, muted,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000200001, 910000000000100001, 910000000000000001, 'owner', TIMESTAMP '2026-05-01 09:00:00', '0', -1, 910000000000000001, TIMESTAMP '2026-05-01 09:00:00', 910000000000000001, TIMESTAMP '2026-05-01 09:00:00', '0'),
+    (910000000000200002, 910000000000100002, 910000000000000002, 'owner', TIMESTAMP '2026-05-01 09:05:00', '0', -1, 910000000000000002, TIMESTAMP '2026-05-01 09:05:00', 910000000000000002, TIMESTAMP '2026-05-01 09:05:00', '0'),
+    (910000000000200003, 910000000000100003, 910000000000000003, 'owner', TIMESTAMP '2026-05-01 09:10:00', '0', -1, 910000000000000003, TIMESTAMP '2026-05-01 09:10:00', 910000000000000003, TIMESTAMP '2026-05-01 09:10:00', '0'),
+    (910000000000200004, 910000000000100004, 910000000000000004, 'owner', TIMESTAMP '2026-05-01 09:15:00', '0', -1, 910000000000000004, TIMESTAMP '2026-05-01 09:15:00', 910000000000000004, TIMESTAMP '2026-05-01 09:15:00', '0'),
+    (910000000000200005, 910000000000100005, 910000000000000005, 'owner', TIMESTAMP '2026-05-01 09:20:00', '0', -1, 910000000000000005, TIMESTAMP '2026-05-01 09:20:00', 910000000000000005, TIMESTAMP '2026-05-01 09:20:00', '0'),
+    (910000000000200006, 910000000000100006, 910000000000000001, 'member', TIMESTAMP '2026-05-02 11:00:00', '0', -1, 910000000000000001, TIMESTAMP '2026-05-02 11:00:00', 910000000000000001, TIMESTAMP '2026-05-02 11:00:00', '0'),
+    (910000000000200007, 910000000000100006, 910000000000000002, 'member', TIMESTAMP '2026-05-02 11:00:00', '0', -1, 910000000000000001, TIMESTAMP '2026-05-02 11:00:00', 910000000000000002, TIMESTAMP '2026-05-02 11:00:00', '0'),
+    (910000000000200008, 910000000000100007, 910000000000000001, 'owner', TIMESTAMP '2026-05-02 12:00:00', '0', -1, 910000000000000001, TIMESTAMP '2026-05-02 12:00:00', 910000000000000001, TIMESTAMP '2026-05-02 12:00:00', '0'),
+    (910000000000200009, 910000000000100007, 910000000000000002, 'admin', TIMESTAMP '2026-05-02 12:01:00', '0', -1, 910000000000000001, TIMESTAMP '2026-05-02 12:01:00', 910000000000000001, TIMESTAMP '2026-05-02 12:01:00', '0'),
+    (910000000000200010, 910000000000100007, 910000000000000003, 'member', TIMESTAMP '2026-05-02 12:02:00', '0', -1, 910000000000000001, TIMESTAMP '2026-05-02 12:02:00', 910000000000000001, TIMESTAMP '2026-05-02 12:02:00', '0'),
+    (910000000000200011, 910000000000100007, 910000000000000005, 'member', TIMESTAMP '2026-05-02 12:03:00', '1', -1, 910000000000000001, TIMESTAMP '2026-05-02 12:03:00', 910000000000000005, TIMESTAMP '2026-05-02 12:03:00', '0'),
+    (910000000000200012, 910000000000100008, 910000000000000001, 'owner', TIMESTAMP '2026-05-02 13:00:00', '0', -1, 910000000000000001, TIMESTAMP '2026-05-02 13:00:00', 910000000000000001, TIMESTAMP '2026-05-02 13:00:00', '0'),
+    (910000000000200013, 910000000000100008, 910000000000000003, 'admin', TIMESTAMP '2026-05-02 13:01:00', '0', -1, 910000000000000001, TIMESTAMP '2026-05-02 13:01:00', 910000000000000001, TIMESTAMP '2026-05-02 13:01:00', '0'),
+    (910000000000200014, 910000000000100008, 910000000000000002, 'subscriber', TIMESTAMP '2026-05-02 13:02:00', '0', -1, 910000000000000001, TIMESTAMP '2026-05-02 13:02:00', 910000000000000002, TIMESTAMP '2026-05-02 13:02:00', '0'),
+    (910000000000200015, 910000000000100008, 910000000000000005, 'subscriber', TIMESTAMP '2026-05-02 13:03:00', '0', -1, 910000000000000001, TIMESTAMP '2026-05-02 13:03:00', 910000000000000005, TIMESTAMP '2026-05-02 13:03:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    chat_id = EXCLUDED.chat_id,
+    user_id = EXCLUDED.user_id,
+    role = EXCLUDED.role,
+    joined_time = EXCLUDED.joined_time,
+    muted = EXCLUDED.muted,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_user_contact (
+    id, user_id, contact_user_id, remark, status,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000250001, 910000000000000001, 910000000000000002, 'Bob 后端', '0', -1, 910000000000000001, TIMESTAMP '2026-05-01 10:00:00', 910000000000000001, TIMESTAMP '2026-05-01 10:00:00', '0'),
+    (910000000000250002, 910000000000000001, 910000000000000003, 'Clara 设计', '0', -1, 910000000000000001, TIMESTAMP '2026-05-01 10:01:00', 910000000000000001, TIMESTAMP '2026-05-01 10:01:00', '0'),
+    (910000000000250003, 910000000000000001, 910000000000000005, 'Eva 运营', '0', -1, 910000000000000001, TIMESTAMP '2026-05-01 10:02:00', 910000000000000001, TIMESTAMP '2026-05-01 10:02:00', '0'),
+    (910000000000250004, 910000000000000002, 910000000000000001, 'Alice 产品', '0', -1, 910000000000000002, TIMESTAMP '2026-05-01 10:03:00', 910000000000000002, TIMESTAMP '2026-05-01 10:03:00', '0'),
+    (910000000000250005, 910000000000000002, 910000000000000003, 'Clara 前端', '0', -1, 910000000000000002, TIMESTAMP '2026-05-01 10:04:00', 910000000000000002, TIMESTAMP '2026-05-01 10:04:00', '0'),
+    (910000000000250006, 910000000000000003, 910000000000000001, 'Alice PM', '0', -1, 910000000000000003, TIMESTAMP '2026-05-01 10:05:00', 910000000000000003, TIMESTAMP '2026-05-01 10:05:00', '0'),
+    (910000000000250007, 910000000000000003, 910000000000000002, 'Bob API', '0', -1, 910000000000000003, TIMESTAMP '2026-05-01 10:06:00', 910000000000000003, TIMESTAMP '2026-05-01 10:06:00', '0'),
+    (910000000000250008, 910000000000000005, 910000000000000001, 'Alice 频道 owner', '0', -1, 910000000000000005, TIMESTAMP '2026-05-01 10:07:00', 910000000000000005, TIMESTAMP '2026-05-01 10:07:00', '0'),
+    (910000000000250009, 910000000000000004, 910000000000000001, '已移除联系人示例', '1', -1, 910000000000000004, TIMESTAMP '2026-05-01 10:08:00', 910000000000000004, TIMESTAMP '2026-05-01 10:30:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    user_id = EXCLUDED.user_id,
+    contact_user_id = EXCLUDED.contact_user_id,
+    remark = EXCLUDED.remark,
+    status = EXCLUDED.status,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_message (
+    id, chat_id, sender_id, message_type, content, content_payload, resource_ids,
+    reply_to_message_id, forward_from_message_id, forward_from_chat_id, forward_sender_id,
+    client_msg_id, idempotent_key, seq, reply_count, status, edit_time, delete_time,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000300001, 910000000000100001, 910000000000000001, 'text', '记得检查 content_payload 是否已经补列。', '{"tags":["schema","postgres"],"pinned":false}'::jsonb, NULL, NULL, NULL, NULL, NULL, 'demo-alice-saved-001', 'seed:alice:saved:001', 1, 0, 'normal', NULL, NULL, -1, 910000000000000001, TIMESTAMP '2026-05-02 10:00:00', 910000000000000001, TIMESTAMP '2026-05-02 10:00:00', '0'),
+    (910000000000300002, 910000000000100001, 910000000000000001, 'file', 'P0 接口联调清单.pdf', '{"filename":"P0 接口联调清单.pdf","mimeType":"application/pdf"}'::jsonb, '[910000000000400001]'::jsonb, NULL, NULL, NULL, NULL, 'demo-alice-saved-002', 'seed:alice:saved:002', 2, 0, 'normal', NULL, NULL, -1, 910000000000000001, TIMESTAMP '2026-05-02 10:05:00', 910000000000000001, TIMESTAMP '2026-05-02 10:05:00', '0'),
+    (910000000000300003, 910000000000100002, 910000000000000002, 'text', 'RocketMQ 消息补偿方案草稿', '{"tags":["mq","event"],"priority":"normal"}'::jsonb, NULL, NULL, NULL, NULL, NULL, 'demo-bob-saved-001', 'seed:bob:saved:001', 1, 0, 'normal', NULL, NULL, -1, 910000000000000002, TIMESTAMP '2026-05-02 10:10:00', 910000000000000002, TIMESTAMP '2026-05-02 10:10:00', '0'),
+    (910000000000300004, 910000000000100003, 910000000000000003, 'text', '收藏：新版聊天气泡截图', '{"tags":["ui","chat-bubble"]}'::jsonb, NULL, NULL, NULL, NULL, NULL, 'demo-clara-saved-001', 'seed:clara:saved:001', 1, 0, 'normal', NULL, NULL, -1, 910000000000000003, TIMESTAMP '2026-05-02 10:15:00', 910000000000000003, TIMESTAMP '2026-05-02 10:15:00', '0'),
+    (910000000000300005, 910000000000100004, 910000000000000004, 'text', '移动端回归用例：离线后重连。', '{"tags":["mobile","sync"]}'::jsonb, NULL, NULL, NULL, NULL, NULL, 'demo-dylan-saved-001', 'seed:dylan:saved:001', 1, 0, 'normal', NULL, NULL, -1, 910000000000000004, TIMESTAMP '2026-05-02 10:20:00', 910000000000000004, TIMESTAMP '2026-05-02 10:20:00', '0'),
+    (910000000000300006, 910000000000100005, 910000000000000005, 'text', '频道运营话术草稿', '{"tags":["channel","ops"]}'::jsonb, NULL, NULL, NULL, NULL, NULL, 'demo-eva-saved-001', 'seed:eva:saved:001', 1, 0, 'normal', NULL, NULL, -1, 910000000000000005, TIMESTAMP '2026-05-02 10:25:00', 910000000000000005, TIMESTAMP '2026-05-02 10:25:00', '0'),
+    (910000000000300007, 910000000000100006, 910000000000000001, 'text', 'Bob，明天先跑建表和演示数据，再看登录链路。', '{"mentions":[910000000000000002],"client":"web"}'::jsonb, NULL, NULL, NULL, NULL, NULL, 'demo-private-001', 'seed:private:alice-bob:001', 1, 1, 'normal', NULL, NULL, -1, 910000000000000001, TIMESTAMP '2026-05-02 11:00:00', 910000000000000001, TIMESTAMP '2026-05-02 11:00:00', '0'),
+    (910000000000300008, 910000000000100006, 910000000000000002, 'text', '收到，我会重点看幂等键和未读数。', '{"client":"desktop"}'::jsonb, NULL, 910000000000300007, NULL, NULL, NULL, 'demo-private-002', 'seed:private:alice-bob:002', 2, 0, 'normal', NULL, NULL, -1, 910000000000000002, TIMESTAMP '2026-05-02 11:05:00', 910000000000000002, TIMESTAMP '2026-05-02 11:05:00', '0'),
+    (910000000000300009, 910000000000100006, 910000000000000001, 'image', '数据库执行成功截图', '{"caption":"本地 PostgreSQL 16 初始化成功"}'::jsonb, '[910000000000400002]'::jsonb, NULL, NULL, NULL, NULL, 'demo-private-003', 'seed:private:alice-bob:003', 3, 0, 'normal', NULL, NULL, -1, 910000000000000001, TIMESTAMP '2026-05-02 11:10:00', 910000000000000001, TIMESTAMP '2026-05-02 11:10:00', '0'),
+    (910000000000300010, 910000000000100006, 910000000000000002, 'forward', '转发：P0 演示环境已准备，可以开始联调。', '{"forwardPreview":"来自发布频道的公告"}'::jsonb, NULL, NULL, 910000000000300016, 910000000000100008, 910000000000000001, 'demo-private-004', 'seed:private:alice-bob:004', 4, 0, 'normal', NULL, NULL, -1, 910000000000000002, TIMESTAMP '2026-05-02 11:15:00', 910000000000000002, TIMESTAMP '2026-05-02 11:15:00', '0'),
+    (910000000000300011, 910000000000100006, NULL, 'system', 'Bob 设置了聊天背景', '{"event":"chat.background.updated","operatorId":910000000000000002}'::jsonb, NULL, NULL, NULL, NULL, NULL, 'demo-private-005', 'seed:private:alice-bob:005', 5, 0, 'normal', NULL, NULL, -1, 910000000000000002, TIMESTAMP '2026-05-02 11:20:00', 910000000000000002, TIMESTAMP '2026-05-02 11:20:00', '0'),
+    (910000000000300012, 910000000000100007, 910000000000000001, 'text', '今天的目标：消息发送、已读、资源、投票都能走通。', '{"topic":"daily-sync"}'::jsonb, NULL, NULL, NULL, NULL, NULL, 'demo-group-001', 'seed:group:p0:001', 1, 1, 'normal', NULL, NULL, -1, 910000000000000001, TIMESTAMP '2026-05-02 12:00:00', 910000000000000001, TIMESTAMP '2026-05-02 12:00:00', '0'),
+    (910000000000300013, 910000000000100007, 910000000000000002, 'file', 'im_p0_postgres.sql 执行记录', '{"filename":"postgres-init-log.txt","mimeType":"text/plain"}'::jsonb, '[910000000000400003]'::jsonb, NULL, NULL, NULL, NULL, 'demo-group-002', 'seed:group:p0:002', 2, 0, 'normal', NULL, NULL, -1, 910000000000000002, TIMESTAMP '2026-05-02 12:10:00', 910000000000000002, TIMESTAMP '2026-05-02 12:10:00', '0'),
+    (910000000000300014, 910000000000100007, 910000000000000003, 'poll', '明天优先联调哪个入口？', '{"pollId":910000000000500001,"question":"明天优先联调哪个入口？"}'::jsonb, NULL, NULL, NULL, NULL, NULL, 'demo-group-003', 'seed:group:p0:003', 3, 0, 'normal', NULL, NULL, -1, 910000000000000003, TIMESTAMP '2026-05-02 12:20:00', 910000000000000003, TIMESTAMP '2026-05-02 12:20:00', '0'),
+    (910000000000300015, 910000000000100007, 910000000000000005, 'text', '我按这个清单补充移动端场景。', '{"client":"mobile"}'::jsonb, NULL, 910000000000300012, NULL, NULL, NULL, 'demo-group-004', 'seed:group:p0:004', 4, 0, 'edited', TIMESTAMP '2026-05-02 12:31:00', NULL, -1, 910000000000000005, TIMESTAMP '2026-05-02 12:30:00', 910000000000000005, TIMESTAMP '2026-05-02 12:31:00', '0'),
+    (910000000000300016, 910000000000100008, 910000000000000001, 'text', 'P0 演示环境已准备，可以开始联调。', '{"level":"announcement"}'::jsonb, NULL, NULL, NULL, NULL, NULL, 'demo-channel-001', 'seed:channel:release:001', 1, 0, 'normal', NULL, NULL, -1, 910000000000000001, TIMESTAMP '2026-05-02 13:00:00', 910000000000000001, TIMESTAMP '2026-05-02 13:00:00', '0'),
+    (910000000000300017, 910000000000100008, 910000000000000003, 'image', '发布频道封面图', '{"caption":"AgentIM P0 release banner"}'::jsonb, '[910000000000400004]'::jsonb, NULL, NULL, NULL, NULL, 'demo-channel-002', 'seed:channel:release:002', 2, 0, 'normal', NULL, NULL, -1, 910000000000000003, TIMESTAMP '2026-05-02 13:10:00', 910000000000000003, TIMESTAMP '2026-05-02 13:10:00', '0'),
+    (910000000000300018, 910000000000100008, 910000000000000001, 'poll', '你希望下一个演示优先展示什么？', '{"pollId":910000000000500002,"question":"你希望下一个演示优先展示什么？"}'::jsonb, NULL, NULL, NULL, NULL, NULL, 'demo-channel-003', 'seed:channel:release:003', 3, 0, 'normal', NULL, NULL, -1, 910000000000000001, TIMESTAMP '2026-05-02 13:20:00', 910000000000000001, TIMESTAMP '2026-05-02 13:20:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    chat_id = EXCLUDED.chat_id,
+    sender_id = EXCLUDED.sender_id,
+    message_type = EXCLUDED.message_type,
+    content = EXCLUDED.content,
+    content_payload = EXCLUDED.content_payload,
+    resource_ids = EXCLUDED.resource_ids,
+    reply_to_message_id = EXCLUDED.reply_to_message_id,
+    forward_from_message_id = EXCLUDED.forward_from_message_id,
+    forward_from_chat_id = EXCLUDED.forward_from_chat_id,
+    forward_sender_id = EXCLUDED.forward_sender_id,
+    client_msg_id = EXCLUDED.client_msg_id,
+    idempotent_key = EXCLUDED.idempotent_key,
+    seq = EXCLUDED.seq,
+    reply_count = EXCLUDED.reply_count,
+    status = EXCLUDED.status,
+    edit_time = EXCLUDED.edit_time,
+    delete_time = EXCLUDED.delete_time,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_resource (
+    id, chat_id, message_id, uploader_id, resource_type, original_name, mime_type, size,
+    storage_provider, object_key, thumbnail_key, width, height, duration, access_level, url,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000400001, 910000000000100001, 910000000000300002, 910000000000000001, 'file', 'P0 接口联调清单.pdf', 'application/pdf', 248320, 'minio', 'demo/alice/checklist.pdf', NULL, NULL, NULL, NULL, 'private', 'https://cdn.agentim.local/demo/alice/checklist.pdf', -1, 910000000000000001, TIMESTAMP '2026-05-02 10:04:30', 910000000000000001, TIMESTAMP '2026-05-02 10:05:00', '0'),
+    (910000000000400002, 910000000000100006, 910000000000300009, 910000000000000001, 'image', 'postgres-init-success.png', 'image/png', 538420, 'minio', 'demo/private/postgres-init-success.png', 'demo/private/postgres-init-success.thumb.png', 1440, 900, NULL, 'chat', 'https://cdn.agentim.local/demo/private/postgres-init-success.png', -1, 910000000000000001, TIMESTAMP '2026-05-02 11:09:30', 910000000000000001, TIMESTAMP '2026-05-02 11:10:00', '0'),
+    (910000000000400003, 910000000000100007, 910000000000300013, 910000000000000002, 'file', 'postgres-init-log.txt', 'text/plain', 16384, 'minio', 'demo/group/postgres-init-log.txt', NULL, NULL, NULL, NULL, 'chat', 'https://cdn.agentim.local/demo/group/postgres-init-log.txt', -1, 910000000000000002, TIMESTAMP '2026-05-02 12:09:30', 910000000000000002, TIMESTAMP '2026-05-02 12:10:00', '0'),
+    (910000000000400004, 910000000000100008, 910000000000300017, 910000000000000003, 'image', 'release-banner.png', 'image/png', 720128, 'minio', 'demo/channel/release-banner.png', 'demo/channel/release-banner.thumb.png', 1920, 1080, NULL, 'public', 'https://cdn.agentim.local/demo/channel/release-banner.png', -1, 910000000000000003, TIMESTAMP '2026-05-02 13:09:30', 910000000000000003, TIMESTAMP '2026-05-02 13:10:00', '0'),
+    (910000000000400005, NULL, NULL, 910000000000000005, 'file', 'channel-copy-draft.md', 'text/markdown', 8192, 'minio', 'demo/eva/channel-copy-draft.md', NULL, NULL, NULL, NULL, 'private', 'https://cdn.agentim.local/demo/eva/channel-copy-draft.md', -1, 910000000000000005, TIMESTAMP '2026-05-02 14:00:00', 910000000000000005, TIMESTAMP '2026-05-02 14:00:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    chat_id = EXCLUDED.chat_id,
+    message_id = EXCLUDED.message_id,
+    uploader_id = EXCLUDED.uploader_id,
+    resource_type = EXCLUDED.resource_type,
+    original_name = EXCLUDED.original_name,
+    mime_type = EXCLUDED.mime_type,
+    size = EXCLUDED.size,
+    storage_provider = EXCLUDED.storage_provider,
+    object_key = EXCLUDED.object_key,
+    thumbnail_key = EXCLUDED.thumbnail_key,
+    width = EXCLUDED.width,
+    height = EXCLUDED.height,
+    duration = EXCLUDED.duration,
+    access_level = EXCLUDED.access_level,
+    url = EXCLUDED.url,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_message_reply (
+    id, message_id, reply_to_message_id, chat_id,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000450001, 910000000000300008, 910000000000300007, 910000000000100006, -1, 910000000000000002, TIMESTAMP '2026-05-02 11:05:00', 910000000000000002, TIMESTAMP '2026-05-02 11:05:00', '0'),
+    (910000000000450002, 910000000000300015, 910000000000300012, 910000000000100007, -1, 910000000000000005, TIMESTAMP '2026-05-02 12:30:00', 910000000000000005, TIMESTAMP '2026-05-02 12:30:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    message_id = EXCLUDED.message_id,
+    reply_to_message_id = EXCLUDED.reply_to_message_id,
+    chat_id = EXCLUDED.chat_id,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_message_reaction (
+    id, message_id, user_id, reaction,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000460001, 910000000000300007, 910000000000000002, '👍', -1, 910000000000000002, TIMESTAMP '2026-05-02 11:01:30', 910000000000000002, TIMESTAMP '2026-05-02 11:01:30', '0'),
+    (910000000000460002, 910000000000300012, 910000000000000002, '✅', -1, 910000000000000002, TIMESTAMP '2026-05-02 12:01:30', 910000000000000002, TIMESTAMP '2026-05-02 12:01:30', '0'),
+    (910000000000460003, 910000000000300012, 910000000000000003, '✅', -1, 910000000000000003, TIMESTAMP '2026-05-02 12:02:30', 910000000000000003, TIMESTAMP '2026-05-02 12:02:30', '0'),
+    (910000000000460004, 910000000000300016, 910000000000000005, '🚀', -1, 910000000000000005, TIMESTAMP '2026-05-02 13:01:30', 910000000000000005, TIMESTAMP '2026-05-02 13:01:30', '0'),
+    (910000000000460005, 910000000000300017, 910000000000000002, '👀', -1, 910000000000000002, TIMESTAMP '2026-05-02 13:11:30', 910000000000000002, TIMESTAMP '2026-05-02 13:11:30', '0')
+ON CONFLICT (id) DO UPDATE SET
+    message_id = EXCLUDED.message_id,
+    user_id = EXCLUDED.user_id,
+    reaction = EXCLUDED.reaction,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_message_read_state (
+    id, user_id, chat_id, last_read_message_id, last_read_seq, last_read_time,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000470001, 910000000000000001, 910000000000100001, 910000000000300002, 2, TIMESTAMP '2026-05-02 10:05:10', -1, 910000000000000001, TIMESTAMP '2026-05-02 10:05:10', 910000000000000001, TIMESTAMP '2026-05-02 10:05:10', '0'),
+    (910000000000470002, 910000000000000002, 910000000000100002, 910000000000300003, 1, TIMESTAMP '2026-05-02 10:11:00', -1, 910000000000000002, TIMESTAMP '2026-05-02 10:11:00', 910000000000000002, TIMESTAMP '2026-05-02 10:11:00', '0'),
+    (910000000000470003, 910000000000000003, 910000000000100003, 910000000000300004, 1, TIMESTAMP '2026-05-02 10:16:00', -1, 910000000000000003, TIMESTAMP '2026-05-02 10:16:00', 910000000000000003, TIMESTAMP '2026-05-02 10:16:00', '0'),
+    (910000000000470004, 910000000000000004, 910000000000100004, 910000000000300005, 1, TIMESTAMP '2026-05-02 10:21:00', -1, 910000000000000004, TIMESTAMP '2026-05-02 10:21:00', 910000000000000004, TIMESTAMP '2026-05-02 10:21:00', '0'),
+    (910000000000470005, 910000000000000005, 910000000000100005, 910000000000300006, 1, TIMESTAMP '2026-05-02 10:26:00', -1, 910000000000000005, TIMESTAMP '2026-05-02 10:26:00', 910000000000000005, TIMESTAMP '2026-05-02 10:26:00', '0'),
+    (910000000000470006, 910000000000000001, 910000000000100006, 910000000000300011, 5, TIMESTAMP '2026-05-02 11:21:00', -1, 910000000000000001, TIMESTAMP '2026-05-02 11:21:00', 910000000000000001, TIMESTAMP '2026-05-02 11:21:00', '0'),
+    (910000000000470007, 910000000000000002, 910000000000100006, 910000000000300009, 3, TIMESTAMP '2026-05-02 11:11:00', -1, 910000000000000002, TIMESTAMP '2026-05-02 11:11:00', 910000000000000002, TIMESTAMP '2026-05-02 11:11:00', '0'),
+    (910000000000470008, 910000000000000001, 910000000000100007, 910000000000300015, 4, TIMESTAMP '2026-05-02 12:31:00', -1, 910000000000000001, TIMESTAMP '2026-05-02 12:31:00', 910000000000000001, TIMESTAMP '2026-05-02 12:31:00', '0'),
+    (910000000000470009, 910000000000000002, 910000000000100007, 910000000000300015, 4, TIMESTAMP '2026-05-02 12:31:00', -1, 910000000000000002, TIMESTAMP '2026-05-02 12:31:00', 910000000000000002, TIMESTAMP '2026-05-02 12:31:00', '0'),
+    (910000000000470010, 910000000000000003, 910000000000100007, 910000000000300014, 3, TIMESTAMP '2026-05-02 12:25:00', -1, 910000000000000003, TIMESTAMP '2026-05-02 12:25:00', 910000000000000003, TIMESTAMP '2026-05-02 12:25:00', '0'),
+    (910000000000470011, 910000000000000005, 910000000000100007, 910000000000300013, 2, TIMESTAMP '2026-05-02 12:15:00', -1, 910000000000000005, TIMESTAMP '2026-05-02 12:15:00', 910000000000000005, TIMESTAMP '2026-05-02 12:15:00', '0'),
+    (910000000000470012, 910000000000000001, 910000000000100008, 910000000000300018, 3, TIMESTAMP '2026-05-02 13:21:00', -1, 910000000000000001, TIMESTAMP '2026-05-02 13:21:00', 910000000000000001, TIMESTAMP '2026-05-02 13:21:00', '0'),
+    (910000000000470013, 910000000000000003, 910000000000100008, 910000000000300018, 3, TIMESTAMP '2026-05-02 13:21:00', -1, 910000000000000003, TIMESTAMP '2026-05-02 13:21:00', 910000000000000003, TIMESTAMP '2026-05-02 13:21:00', '0'),
+    (910000000000470014, 910000000000000002, 910000000000100008, 910000000000300017, 2, TIMESTAMP '2026-05-02 13:12:00', -1, 910000000000000002, TIMESTAMP '2026-05-02 13:12:00', 910000000000000002, TIMESTAMP '2026-05-02 13:12:00', '0'),
+    (910000000000470015, 910000000000000005, 910000000000100008, 910000000000300016, 1, TIMESTAMP '2026-05-02 13:02:00', -1, 910000000000000005, TIMESTAMP '2026-05-02 13:02:00', 910000000000000005, TIMESTAMP '2026-05-02 13:02:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    user_id = EXCLUDED.user_id,
+    chat_id = EXCLUDED.chat_id,
+    last_read_message_id = EXCLUDED.last_read_message_id,
+    last_read_seq = EXCLUDED.last_read_seq,
+    last_read_time = EXCLUDED.last_read_time,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_pinned_message (
+    id, chat_id, message_id, pinned_by, pinned_time,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000480001, 910000000000100001, 910000000000300001, 910000000000000001, TIMESTAMP '2026-05-02 10:02:00', -1, 910000000000000001, TIMESTAMP '2026-05-02 10:02:00', 910000000000000001, TIMESTAMP '2026-05-02 10:02:00', '0'),
+    (910000000000480002, 910000000000100006, 910000000000300007, 910000000000000001, TIMESTAMP '2026-05-02 11:02:00', -1, 910000000000000001, TIMESTAMP '2026-05-02 11:02:00', 910000000000000001, TIMESTAMP '2026-05-02 11:02:00', '0'),
+    (910000000000480003, 910000000000100007, 910000000000300012, 910000000000000002, TIMESTAMP '2026-05-02 12:03:00', -1, 910000000000000002, TIMESTAMP '2026-05-02 12:03:00', 910000000000000002, TIMESTAMP '2026-05-02 12:03:00', '0'),
+    (910000000000480004, 910000000000100008, 910000000000300016, 910000000000000003, TIMESTAMP '2026-05-02 13:03:00', -1, 910000000000000003, TIMESTAMP '2026-05-02 13:03:00', 910000000000000003, TIMESTAMP '2026-05-02 13:03:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    chat_id = EXCLUDED.chat_id,
+    message_id = EXCLUDED.message_id,
+    pinned_by = EXCLUDED.pinned_by,
+    pinned_time = EXCLUDED.pinned_time,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_poll (
+    id, message_id, question, multiple, anonymous, status, close_time,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000500001, 910000000000300014, '明天优先联调哪个入口？', '0', '0', 'active', TIMESTAMP '2026-05-04 18:00:00', -1, 910000000000000003, TIMESTAMP '2026-05-02 12:20:00', 910000000000000003, TIMESTAMP '2026-05-02 12:20:00', '0'),
+    (910000000000500002, 910000000000300018, '你希望下一个演示优先展示什么？', '1', '1', 'active', TIMESTAMP '2026-05-05 18:00:00', -1, 910000000000000001, TIMESTAMP '2026-05-02 13:20:00', 910000000000000001, TIMESTAMP '2026-05-02 13:20:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    message_id = EXCLUDED.message_id,
+    question = EXCLUDED.question,
+    multiple = EXCLUDED.multiple,
+    anonymous = EXCLUDED.anonymous,
+    status = EXCLUDED.status,
+    close_time = EXCLUDED.close_time,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_poll_option (
+    id, poll_id, text, ordinal,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000510001, 910000000000500001, 'Web 登录与个人资料', 1, -1, 910000000000000003, TIMESTAMP '2026-05-02 12:20:00', 910000000000000003, TIMESTAMP '2026-05-02 12:20:00', '0'),
+    (910000000000510002, 910000000000500001, '聊天列表与消息发送', 2, -1, 910000000000000003, TIMESTAMP '2026-05-02 12:20:00', 910000000000000003, TIMESTAMP '2026-05-02 12:20:00', '0'),
+    (910000000000510003, 910000000000500001, '文件上传与图片预览', 3, -1, 910000000000000003, TIMESTAMP '2026-05-02 12:20:00', 910000000000000003, TIMESTAMP '2026-05-02 12:20:00', '0'),
+    (910000000000510004, 910000000000500002, '频道公告', 1, -1, 910000000000000001, TIMESTAMP '2026-05-02 13:20:00', 910000000000000001, TIMESTAMP '2026-05-02 13:20:00', '0'),
+    (910000000000510005, 910000000000500002, '投票统计', 2, -1, 910000000000000001, TIMESTAMP '2026-05-02 13:20:00', 910000000000000001, TIMESTAMP '2026-05-02 13:20:00', '0'),
+    (910000000000510006, 910000000000500002, '多设备同步', 3, -1, 910000000000000001, TIMESTAMP '2026-05-02 13:20:00', 910000000000000001, TIMESTAMP '2026-05-02 13:20:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    poll_id = EXCLUDED.poll_id,
+    text = EXCLUDED.text,
+    ordinal = EXCLUDED.ordinal,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_poll_vote (
+    id, poll_id, option_id, user_id, voted_time,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000520001, 910000000000500001, 910000000000510002, 910000000000000001, TIMESTAMP '2026-05-02 12:21:00', -1, 910000000000000001, TIMESTAMP '2026-05-02 12:21:00', 910000000000000001, TIMESTAMP '2026-05-02 12:21:00', '0'),
+    (910000000000520002, 910000000000500001, 910000000000510002, 910000000000000002, TIMESTAMP '2026-05-02 12:22:00', -1, 910000000000000002, TIMESTAMP '2026-05-02 12:22:00', 910000000000000002, TIMESTAMP '2026-05-02 12:22:00', '0'),
+    (910000000000520003, 910000000000500001, 910000000000510003, 910000000000000005, TIMESTAMP '2026-05-02 12:23:00', -1, 910000000000000005, TIMESTAMP '2026-05-02 12:23:00', 910000000000000005, TIMESTAMP '2026-05-02 12:23:00', '0'),
+    (910000000000520004, 910000000000500002, 910000000000510004, 910000000000000002, TIMESTAMP '2026-05-02 13:21:00', -1, 910000000000000002, TIMESTAMP '2026-05-02 13:21:00', 910000000000000002, TIMESTAMP '2026-05-02 13:21:00', '0'),
+    (910000000000520005, 910000000000500002, 910000000000510005, 910000000000000003, TIMESTAMP '2026-05-02 13:22:00', -1, 910000000000000003, TIMESTAMP '2026-05-02 13:22:00', 910000000000000003, TIMESTAMP '2026-05-02 13:22:00', '0'),
+    (910000000000520006, 910000000000500002, 910000000000510006, 910000000000000005, TIMESTAMP '2026-05-02 13:23:00', -1, 910000000000000005, TIMESTAMP '2026-05-02 13:23:00', 910000000000000005, TIMESTAMP '2026-05-02 13:23:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    poll_id = EXCLUDED.poll_id,
+    option_id = EXCLUDED.option_id,
+    user_id = EXCLUDED.user_id,
+    voted_time = EXCLUDED.voted_time,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_user_message_hide (
+    id, user_id, message_id, hidden_time,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000530001, 910000000000000002, 910000000000300007, TIMESTAMP '2026-05-02 11:30:00', -1, 910000000000000002, TIMESTAMP '2026-05-02 11:30:00', 910000000000000002, TIMESTAMP '2026-05-02 11:30:00', '0'),
+    (910000000000530002, 910000000000000005, 910000000000300012, TIMESTAMP '2026-05-02 12:40:00', -1, 910000000000000005, TIMESTAMP '2026-05-02 12:40:00', 910000000000000005, TIMESTAMP '2026-05-02 12:40:00', '0')
+ON CONFLICT (id) DO UPDATE SET
+    user_id = EXCLUDED.user_id,
+    message_id = EXCLUDED.message_id,
+    hidden_time = EXCLUDED.hidden_time,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+INSERT INTO im_audit_log (
+    id, chat_id, resource_type, resource_id, action, actor_id, summary, ipaddr, user_agent, payload, occurred_time,
+    create_dept, create_by, create_time, update_by, update_time, del_flag
+) VALUES
+    (910000000000800001, NULL, 'im_user', 910000000000000001, 'im.user.register', 910000000000000001, '注册演示用户 demo_alice', '127.0.0.1', 'AgentIM-Seed/1.0', '{"username":"demo_alice"}'::jsonb, TIMESTAMP '2026-05-01 09:00:00', -1, -1, TIMESTAMP '2026-05-01 09:00:00', -1, TIMESTAMP '2026-05-01 09:00:00', '0'),
+    (910000000000800002, 910000000000100006, 'im_chat', 910000000000100006, 'im.chat.create', 910000000000000001, '创建 Alice 与 Bob 私聊', '127.0.0.1', 'AgentIM-Seed/1.0', '{"type":"private","members":[910000000000000001,910000000000000002]}'::jsonb, TIMESTAMP '2026-05-02 11:00:00', -1, 910000000000000001, TIMESTAMP '2026-05-02 11:00:00', 910000000000000001, TIMESTAMP '2026-05-02 11:00:00', '0'),
+    (910000000000800003, 910000000000100007, 'im_chat', 910000000000100007, 'im.chat.create', 910000000000000001, '创建 AgentIM P0 研发群', '127.0.0.1', 'AgentIM-Seed/1.0', '{"type":"group","members":4}'::jsonb, TIMESTAMP '2026-05-02 12:00:00', -1, 910000000000000001, TIMESTAMP '2026-05-02 12:00:00', 910000000000000001, TIMESTAMP '2026-05-02 12:00:00', '0'),
+    (910000000000800004, 910000000000100008, 'im_chat', 910000000000100008, 'im.chat.create', 910000000000000001, '创建 AgentIM 发布频道', '127.0.0.1', 'AgentIM-Seed/1.0', '{"type":"channel","members":4}'::jsonb, TIMESTAMP '2026-05-02 13:00:00', -1, 910000000000000001, TIMESTAMP '2026-05-02 13:00:00', 910000000000000001, TIMESTAMP '2026-05-02 13:00:00', '0'),
+    (910000000000800005, 910000000000100006, 'im_message', 910000000000300007, 'im.message.send', 910000000000000001, 'Alice 在私聊发送文本消息', '127.0.0.1', 'AgentIM-Seed/1.0', '{"messageType":"text","seq":1}'::jsonb, TIMESTAMP '2026-05-02 11:00:00', -1, 910000000000000001, TIMESTAMP '2026-05-02 11:00:00', 910000000000000001, TIMESTAMP '2026-05-02 11:00:00', '0'),
+    (910000000000800006, 910000000000100007, 'im_resource', 910000000000400003, 'im.resource.upload', 910000000000000002, 'Bob 上传群文件', '127.0.0.1', 'AgentIM-Seed/1.0', '{"resourceType":"file","accessLevel":"chat"}'::jsonb, TIMESTAMP '2026-05-02 12:09:30', -1, 910000000000000002, TIMESTAMP '2026-05-02 12:09:30', 910000000000000002, TIMESTAMP '2026-05-02 12:09:30', '0'),
+    (910000000000800007, 910000000000100007, 'im_poll', 910000000000500001, 'im.poll.vote', 910000000000000002, 'Bob 参与群投票', '127.0.0.1', 'AgentIM-Seed/1.0', '{"pollId":910000000000500001,"optionId":910000000000510002}'::jsonb, TIMESTAMP '2026-05-02 12:22:00', -1, 910000000000000002, TIMESTAMP '2026-05-02 12:22:00', 910000000000000002, TIMESTAMP '2026-05-02 12:22:00', '0'),
+    (910000000000800008, 910000000000100006, 'im_message', 910000000000300007, 'im.message.pin', 910000000000000001, 'Alice 置顶私聊关键消息', '127.0.0.1', 'AgentIM-Seed/1.0', '{"pinnedMessageId":910000000000480002}'::jsonb, TIMESTAMP '2026-05-02 11:02:00', -1, 910000000000000001, TIMESTAMP '2026-05-02 11:02:00', 910000000000000001, TIMESTAMP '2026-05-02 11:02:00', '0'),
+    (910000000000800009, 910000000000100006, 'im_message', 910000000000300007, 'im.message.hide_self', 910000000000000002, 'Bob 仅自己隐藏一条私聊消息', '127.0.0.1', 'AgentIM-Seed/1.0', '{"hideId":910000000000530001}'::jsonb, TIMESTAMP '2026-05-02 11:30:00', -1, 910000000000000002, TIMESTAMP '2026-05-02 11:30:00', 910000000000000002, TIMESTAMP '2026-05-02 11:30:00', '0'),
+    (910000000000800010, 910000000000100008, 'im_message', 910000000000300016, 'im.reaction.add', 910000000000000005, 'Eva 对频道公告添加反应', '127.0.0.1', 'AgentIM-Seed/1.0', '{"reaction":"🚀"}'::jsonb, TIMESTAMP '2026-05-02 13:01:30', -1, 910000000000000005, TIMESTAMP '2026-05-02 13:01:30', 910000000000000005, TIMESTAMP '2026-05-02 13:01:30', '0')
+ON CONFLICT (id) DO UPDATE SET
+    chat_id = EXCLUDED.chat_id,
+    resource_type = EXCLUDED.resource_type,
+    resource_id = EXCLUDED.resource_id,
+    action = EXCLUDED.action,
+    actor_id = EXCLUDED.actor_id,
+    summary = EXCLUDED.summary,
+    ipaddr = EXCLUDED.ipaddr,
+    user_agent = EXCLUDED.user_agent,
+    payload = EXCLUDED.payload,
+    occurred_time = EXCLUDED.occurred_time,
+    update_by = EXCLUDED.update_by,
+    update_time = EXCLUDED.update_time,
+    del_flag = EXCLUDED.del_flag;
+
+COMMIT;

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.AgentIM</groupId>
+        <artifactId>AgentIM</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <modules>
+        <module>AgentIM-common-bom</module>
+        <module>AgentIM-common-alibaba-bom</module>
+        <module>AgentIM-common-log</module>
+        <module>AgentIM-common-service-impl</module>
+        <module>AgentIM-common-excel</module>
+        <module>AgentIM-common-core</module>
+        <module>AgentIM-common-redis</module>
+        <module>AgentIM-common-doc</module>
+        <module>AgentIM-common-security</module>
+        <module>AgentIM-common-satoken</module>
+        <module>AgentIM-common-web</module>
+        <module>AgentIM-common-mybatis</module>
+        <module>AgentIM-common-dubbo</module>
+        <module>AgentIM-common-seata</module>
+        <module>AgentIM-common-loadbalancer</module>
+        <module>AgentIM-common-oss</module>
+        <module>AgentIM-common-ratelimiter</module>
+        <module>AgentIM-common-idempotent</module>
+        <module>AgentIM-common-mail</module>
+        <module>AgentIM-common-sms</module>
+        <module>AgentIM-common-logstash</module>
+        <module>AgentIM-common-elasticsearch</module>
+        <module>AgentIM-common-skylog</module>
+        <module>AgentIM-common-prometheus</module>
+        <module>AgentIM-common-translation</module>
+        <module>AgentIM-common-sensitive</module>
+        <module>AgentIM-common-json</module>
+        <module>AgentIM-common-encrypt</module>
+        <module>AgentIM-common-websocket</module>
+        <module>AgentIM-common-social</module>
+        <module>AgentIM-common-bus</module>
+        <module>AgentIM-common-sse</module>
+    </modules>
+
+    <artifactId>AgentIM-common</artifactId>
+    <packaging>pom</packaging>
+
+    <description>
+        AgentIM-common通用模块
+    </description>
+
+</project>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.AgentIM</groupId>
+        <artifactId>AgentIM</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>AgentIM-Business</artifactId>
+
+    <description>
+        AgentIM-Business业务模块
+    </description>
+
+    <dependencies>
+
+        <!-- SpringCloud Alibaba Nacos -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-common-log</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-api-auth</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-api-resource</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-common-doc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-common-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-common-websocket</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-common-json</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-common-mybatis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-common-dubbo</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-common-seata</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-common-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-common-encrypt</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.AgentIM</groupId>
+            <artifactId>AgentIM-common-service-impl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

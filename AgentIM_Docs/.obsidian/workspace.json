@@ -1,0 +1,225 @@
+{
+  "main": {
+    "id": "e0fb3019adac8dcd",
+    "type": "split",
+    "children": [
+      {
+        "id": "6ad5bdeeb8af9ae4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2aca27ec0af15eee",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "p0/05_API与数据契约.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "05_API与数据契约"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "f5f725cb092e315e",
+    "type": "split",
+    "children": [
+      {
+        "id": "94a442d373512078",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "70f2ceb6831c30a6",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "8c045133865ea1f9",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "89b78e76cc8de256",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "45f88087a276deef",
+    "type": "split",
+    "children": [
+      {
+        "id": "8ac8da09901d57aa",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c4bf55096ab5077f",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "02_product_positioning_and_scope.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "02_product_positioning_and_scope 的反向链接列表"
+            }
+          },
+          {
+            "id": "d5f991e3812cbe51",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "02_product_positioning_and_scope.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "02_product_positioning_and_scope 的出链列表"
+            }
+          },
+          {
+            "id": "1991f1f427753b8f",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "c8002c4d2e65d1fc",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "5735210d203f8fcc",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "02_product_positioning_and_scope.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "02_product_positioning_and_scope 的大纲"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false
+    }
+  },
+  "active": "2aca27ec0af15eee",
+  "lastOpenFiles": [
+    "p0/03_领域模型与数据库.md",
+    "p0/04_后端模块结构_枚举_权限.md",
+    "p0/05_API与数据契约.md",
+    "p0/06_消息流未读与WebSocket.md",
+    "p0/99_完整快速参考.md",
+    "p0/01_Codex执行说明.md",
+    "p0/12_测试部署性能.md",
+    "00_阅读说明.md",
+    "p2/09_代码开发协作流程.md",
+    "p0/10_事件搜索文件审计安全.md",
+    "p2/08_Webhook与斜杠命令.md",
+    "p0/02_产品定位与边界.md",
+    "p1/07_Agent运行时与权限.md",
+    "p0/11_伪代码与实现建议.md",
+    "p2",
+    "p1",
+    "p0",
+    "p1p2/09_代码开发协作流程.md",
+    "p1p2/08_Webhook与斜杠命令.md",
+    "02_产品定位与边界.md",
+    "05_API与数据契约.md",
+    "12_测试部署性能.md",
+    "11_伪代码与实现建议.md",
+    "10_事件搜索文件审计安全.md",
+    "06_消息流未读与WebSocket.md",
+    "03_领域模型与数据库.md",
+    "99_完整快速参考.md.tmp.11608.e2512abc2348",
+    "99_完整快速参考.md.tmp.11608.094d34207f0f",
+    "11_伪代码与实现建议.md.tmp.11608.eddd87c72871",
+    "10_事件搜索文件审计安全.md.tmp.11608.8890e72f40b0",
+    "06_消息流未读与WebSocket.md.tmp.11608.a3c17e71532f",
+    "05_API与数据契约.md.tmp.11608.8a1f6c02a656",
+    "03_领域模型与数据库.md.tmp.11608.af93d7930386",
+    "04_后端模块结构_枚举_权限.md",
+    "01_Codex执行说明.md",
+    "p1p2/07_Agent运行时与权限.md"
+  ]
+}

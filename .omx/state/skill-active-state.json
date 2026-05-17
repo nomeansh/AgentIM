@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "active": true,
+  "skill": "code-review",
+  "keyword": "CODE REVIEW",
+  "phase": "reviewing",
+  "activated_at": "2026-05-17T03:46:45.819Z",
+  "updated_at": "2026-05-17T06:10:18.301Z",
+  "source": "keyword-detector",
+  "input_lock": null,
+  "iteration": 1,
+  "last_turn_at": "2026-05-17T06:22:36.057Z"
+}
